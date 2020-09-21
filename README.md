@@ -1,11 +1,12 @@
 # Maven Resource
 
-[![CI Builds](https://ci.nulldriver.com/api/v1/teams/resources/pipelines/maven-resource/jobs/test/badge)](https://ci.nulldriver.com/teams/resources/pipelines/maven-resource)
-[![Docker Pulls](https://img.shields.io/docker/pulls/nulldriver/maven-resource.svg)](https://hub.docker.com/r/nulldriver/maven-resource/)
-
 Deploys and retrieve artifacts from a Maven Repository Manager.
 
-
+## Fuse-specific settings
+* Resource available at: `artifacts.cahcommtech.com/maven-resource`  
+* This repo forked the original repo and merged in [this PR](https://github.com/nulldriver/maven-resource/pull/32). 
+* The pipeline for publishing to cahcommerial is in the root of this project: `cahcommerical-pipeline.yml`
+* It is currently running in the master-builders team Concourse space.
 
 ## Source Configuration
 

@@ -1,0 +1,52 @@
+resource_types:
+  - name: maven-resource
+    type: docker-image
+    source:
+      repository: cahcommerical/maven-resource
+      tag: latest
+
+resources:
+  - name: source
+    type: git
+    source:
+      uri: git@github.com:cahcommercial/maven-resource
+      branch: master
+      private_key: ((deploy-keys.maven-resource))
+
+  - name: maven-resource-docker-image
+    check_every: 5m
+    type: docker-image
+    icon: docker
+    source:
+      repository: ((artifacts.url))/maven-resource
+      tag: base
+      username: ((artifacts.username))
+      password: ((artifacts.password))
+
+  - name: version
+    check_every: 5m
+    type: semver
+    source:
+      driver: git
+      uri: git@github.com:cahcommercial/maven-resource
+      branch: version
+      private_key: ((deploy-keys.maven-resource))
+      file: version
+
+jobs:
+  - name: publish-docker-file
+    serial: true
+    build_logs_to_retain: 15
+    plan:
+      - get: source
+        trigger: true
+      - get: version
+        params: { bump: patch }
+      - put: maven-resource-docker-image
+        params:
+          build: source
+          tag_file: version/version
+          tag_as_latest: true
+      - put: version
+        params:
+          file: version/version
