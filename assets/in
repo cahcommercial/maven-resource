@@ -34,11 +34,12 @@ fi
 release_url=$(jq -r '.source.url //empty' < $payload)
 snapshot_url=$(jq -r '.source.snapshot_url //empty' < $payload)
 artifact=$(jq -r '.source.artifact //empty' < $payload)
-version=$(jq -r '.version.version //empty' < $payload)
 username=$(jq -r '.source.username //empty' < $payload)
 password=$(jq -r '.source.password //empty' < $payload)
 skip_cert_check=$(jq -r '.source.skip_cert_check //empty' < $payload)
 repository_cert=$(jq -r '.source.repository_cert //empty' < $payload)
+version_file=$(jq -r '.params.version_file //empty' < $payload)
+version=$(cat $version_file)
 
 # TODO: Add more error checking
 if [ -z "$release_url" ] && [ -z "$snapshot_url" ] ; then
