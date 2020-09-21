@@ -43,6 +43,7 @@ version_file=$(jq -r '.params.version_file //empty' < $payload)
 
 if [ -f "$version_file" ]; then
   version=$(cat $version_file)
+  echo "version_file found: $version"
 fi
 
 # TODO: Add more error checking
