@@ -31,7 +31,8 @@ if [ "$debug" = "true" ]; then
   set -x
 fi
 
-url=$(jq -r '.source.url //empty' < $payload)
+release_url=$(jq -r '.source.url //empty' < $payload)
+snapshot_url=$(jq -r '.source.snapshot_url //empty' < $payload)
 artifact=$(jq -r '.source.artifact //empty' < $payload)
 version=$(jq -r '.source.version //empty' < $payload)
 username=$(jq -r '.source.username //empty' < $payload)
@@ -40,8 +41,8 @@ skip_cert_check=$(jq -r '.source.skip_cert_check //empty' < $payload)
 repository_cert=$(jq -r '.source.repository_cert //empty' < $payload)
 
 # TODO: Add more error checking
-if [ -z "$url" ] ; then
-  echo "[ERROR] invalid payload (must specify url)"
+if [ -z "$release_url" ] && [ -z "$snapshot_url" ] ; then
+  echo "[ERROR] invalid payload (must specify url or snapshot_url)"
   exit 1
 fi
 
@@ -87,6 +88,8 @@ fi
 isSnapshot=false
 [[ "$version" = *-SNAPSHOT ]] || echo "$version" | grep -oEq "[0-9]{8}\.[0-9]{6}-[0-9]{1,}" && isSnapshot=true
 
+url=$release_url
+[ -n "$snapshot_url" ] && [ "$isSnapshot" = true ] && url=$snapshot_url
 
 args=
 args="$args -Dartifact=$artifactItem"
@@ -97,7 +100,6 @@ args="$args -Drepository.url=$url"
 [ -n "$password" ] && args="$args -Drepository.password=$password";
 
 $resource_dir/mvnw dependency:copy $args
-echo $version > version
 
 jq -n \
 --arg version "$version" \

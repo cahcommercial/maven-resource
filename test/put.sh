@@ -11,9 +11,10 @@ it_can_deploy_release_to_folder_without_pom() {
   mkdir $src/m2-snapshot
 
   local url=file://$src/m2-release
+  local snapshot_url=file://$src/m2-snapshot
   local version=1.0.0-rc.0
 
-  deploy_without_pom_without_credentials $url $version $src | jq -e "
+  deploy_without_pom_without_credentials $url $version $src $snapshot_url | jq -e "
     .version == {version: $(echo $version | jq -R .)}
   "
 }
@@ -24,10 +25,11 @@ it_can_deploy_snapshot_to_folder_without_pom() {
   mkdir $src/m2-release
   mkdir $src/m2-snapshot
 
+  local url=file://$src/m2-release
   local snapshot_url=file://$src/m2-snapshot
   local version=1.0.0-rc.0-SNAPSHOT
 
-  local snapshot_version=$(deploy_without_pom_without_credentials $snapshot_url $version $src | jq -r '.version.version')
+  local snapshot_version=$(deploy_without_pom_without_credentials $url $version $src $snapshot_url | jq -r '.version.version')
   local snapshot_date=$(env TZ=UTC date '+%Y%m%d.')
 
   [[ "$snapshot_version" = "${version%-SNAPSHOT}-$snapshot_date"* ]]

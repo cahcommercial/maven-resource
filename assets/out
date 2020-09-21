@@ -33,7 +33,8 @@ if [ "$debug" = "true" ]; then
   set -x
 fi
 
-url=$(jq -r '.source.url //empty' < $payload)
+release_url=$(jq -r '.source.url //empty' < $payload)
+snapshot_url=$(jq -r '.source.snapshot_url //empty' < $payload)
 artifact=$(jq -r '.source.artifact //empty' < $payload)
 username=$(jq -r '.source.username //empty' < $payload)
 password=$(jq -r '.source.password //empty' < $payload)
@@ -65,8 +66,8 @@ packaging=$(get_packaging $artifact)
 classifier=$(get_classifier $artifact)
 
 # TODO: Add more error checking
-if [ -z "$url" ] ; then
-  echo "[ERROR] invalid payload (must specify url)"
+if [ -z "$release_url" ] && [ -z "$snapshot_url" ]; then
+  echo "[ERROR] invalid payload (must specify url or snapshot_url)"
   exit 1
 fi
 
@@ -104,10 +105,13 @@ fi
 isSnapshot=false
 [[ "$version" = *-SNAPSHOT ]] || echo "$version" | grep -oEq "[0-9]{8}\.[0-9]{6}-[0-9]{1,}" && isSnapshot=true
 
+url=$release_url
+[ -n "$snapshot_url" ] && [ "$isSnapshot" = true ] && url=$snapshot_url
+
 if [ "$disable_redeploy" = "true" ] && [ "$isSnapshot" != true ]; then
   foundVersions=$(jq -n \
   --arg version "$version" \
-  --arg url "$url" \
+  --arg url "$release_url" \
   --arg artifact "$artifact" \
   --arg username "$username" \
   --arg password "$password" \
@@ -131,7 +135,7 @@ if [ "$disable_redeploy" = "true" ] && [ "$isSnapshot" != true ]; then
 
   for foundVersion in $foundVersions; do
     if [ "$version" = "$foundVersion" ]; then
-      echo "[WARNING] disable_redeploy enabled: Found existing version $version in repository $url. Skipping deploy!"
+      echo "[WARNING] disable_redeploy enabled: Found existing version $version in repository $release_url. Skipping deploy!"
       jq -n \
       --arg version "$version" \
       '{
@@ -161,7 +165,8 @@ $resource_dir/mvnw deploy:deploy-file $args
 if [[ "$version" = *-SNAPSHOT ]]; then
   version=$(jq -n \
   --arg version "$version" \
-  --arg url "$url" \
+  --arg release_url "$release_url" \
+  --arg snapshot_url "$snapshot_url" \
   --arg artifact "$artifact" \
   --arg username "$username" \
   --arg password "$password" \
@@ -173,7 +178,8 @@ if [[ "$version" = *-SNAPSHOT ]]; then
       version: $version
     },
     source: {
-      url: $url,
+      url: $release_url,
+      snapshot_url: $snapshot_url,
       artifact: $artifact,
       username: $username,
       password: $password,
