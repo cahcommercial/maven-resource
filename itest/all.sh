@@ -26,31 +26,6 @@ it_can_deploy_snapshot_using_url() {
   local debug=false
 
   REPO_URL=$MVN_SNAPSHOT_URL
-  REPO_SNAPSHOT_URL=
-
-  deploy_artifact_to_manager_with_pom $project $version $debug | jq -r '.version.version' | grep -oEq "$UNIQUE_SNAPSHOT_PATTERN"
-}
-
-it_can_deploy_snapshot_using_snapshot_url() {
-
-  local project=$BASE_DIR/test/fixtures/project
-  local version=1.0.0-SNAPSHOT
-  local debug=false
-
-  REPO_URL=
-  REPO_SNAPSHOT_URL=$MVN_SNAPSHOT_URL
-
-  deploy_artifact_to_manager_with_pom $project $version $debug | jq -r '.version.version' | grep -oEq "$UNIQUE_SNAPSHOT_PATTERN"
-}
-
-it_can_deploy_snapshot_using_both_urls() {
-
-  local project=$BASE_DIR/test/fixtures/project
-  local version=1.0.0-SNAPSHOT
-  local debug=false
-
-  REPO_URL=$MVN_REPO_URL
-  REPO_SNAPSHOT_URL=$MVN_SNAPSHOT_URL
 
   deploy_artifact_to_manager_with_pom $project $version $debug | jq -r '.version.version' | grep -oEq "$UNIQUE_SNAPSHOT_PATTERN"
 }
@@ -62,7 +37,6 @@ it_can_deploy_release() {
   local debug=false
 
   REPO_URL=$MVN_REPO_URL
-  REPO_SNAPSHOT_URL=
 
   deploy_artifact_to_manager_with_pom $project $version $debug | jq -e --arg version $version \
   '
@@ -76,29 +50,6 @@ it_can_check_snapshot_using_url() {
   local debug=false
 
   REPO_URL=$MVN_SNAPSHOT_URL
-  REPO_SNAPSHOT_URL=
-
-  check_artifact_from_manager $version $debug | jq -r '.[].version' | grep -oEq "$UNIQUE_SNAPSHOT_PATTERN"
-}
-
-it_can_check_snapshot_using_snapshot_url() {
-
-  local version=1.0.0-SNAPSHOT
-  local debug=false
-
-  REPO_URL=
-  REPO_SNAPSHOT_URL=$MVN_SNAPSHOT_URL
-
-  check_artifact_from_manager $version $debug | jq -r '.[].version' | grep -oEq "$UNIQUE_SNAPSHOT_PATTERN"
-}
-
-it_can_check_snapshot_using_both_urls() {
-
-  local version=1.0.0-SNAPSHOT
-  local debug=false
-
-  REPO_URL=$MVN_REPO_URL
-  REPO_SNAPSHOT_URL=$MVN_SNAPSHOT_URL
 
   check_artifact_from_manager $version $debug | jq -r '.[].version' | grep -oEq "$UNIQUE_SNAPSHOT_PATTERN"
 }
@@ -110,7 +61,6 @@ it_can_check_release() {
   local debug=false
 
   REPO_URL=$MVN_REPO_URL
-  REPO_SNAPSHOT_URL=$MVN_SNAPSHOT_URL
 
   check_artifact_from_manager $version $debug | jq -e --arg version "$version" --arg latestVersion "$latestVersion" \
   '
@@ -130,8 +80,6 @@ REPO_DISABLE_REDEPLOY=
 
 #---
 run it_can_deploy_snapshot_using_url
-run it_can_deploy_snapshot_using_snapshot_url
-run it_can_deploy_snapshot_using_both_urls
 
 #---
 version1="1.0.$UNIQUE_ID" && increment_unique_id
@@ -159,8 +107,6 @@ REPO_DISABLE_REDEPLOY=
 
 #---
 run it_can_check_snapshot_using_url
-run it_can_check_snapshot_using_snapshot_url
-run it_can_check_snapshot_using_both_urls
 run it_can_check_release $version2 $version3
 
 printf '\e[32mall tests passed!\e[0m'

@@ -106,7 +106,6 @@ deploy_artifact_to_manager_with_pom() {
   --arg file "$src/project/target/project-$version.jar" \
   --arg pom_file "$src/project/pom.xml" \
   --arg url "$REPO_URL" \
-  --arg snapshot_url "$REPO_SNAPSHOT_URL" \
   --arg artifact "$groupId:$artifactId:$packaging" \
   --arg username "$REPO_USERNAME" \
   --arg password "$REPO_PASSWORD" \
@@ -121,7 +120,6 @@ deploy_artifact_to_manager_with_pom() {
     },
     source: {
       url: $url,
-      snapshot_url: $snapshot_url,
       artifact: $artifact,
       username: $username,
       password: $password,
@@ -164,7 +162,6 @@ check_artifact_from_manager() {
   jq -n \
   --arg version "$version" \
   --arg url "$REPO_URL" \
-  --arg snapshot_url "$REPO_SNAPSHOT_URL" \
   --arg artifact 'com.example:project:jar' \
   --arg username "$REPO_USERNAME" \
   --arg password "$REPO_PASSWORD" \
@@ -176,7 +173,6 @@ check_artifact_from_manager() {
     },
     source: {
       url: $url,
-      snapshot_url: $snapshot_url,
       artifact: $artifact,
       username: $username,
       password: $password,
@@ -220,7 +216,6 @@ get_artifact() {
 deploy_without_pom_without_credentials() {
 
   local url=$1
-  local snapshot_url=${4:-''}
   local version=$2
   local src=$3
 
@@ -250,7 +245,6 @@ deploy_without_pom_without_credentials() {
   --arg pom "$pom" \
   --arg version_file "$version_file" \
   --arg url "$url" \
-  --arg snapshot_url "$snapshot_url" \
   --arg artifact "$artifact" \
   '{
     params: {
@@ -260,7 +254,6 @@ deploy_without_pom_without_credentials() {
     },
     source: {
       url: $url,
-      snapshot_url: $snapshot_url,
       artifact: $artifact
     }
   }' | $resource_dir/out "$src" | tee /dev/stderr
@@ -275,7 +268,6 @@ deploy_without_pom_with_credentials() {
   local repository_cert=$4
   local src=$5
   local url=$6
-  local snapshot_url=$7
 
   local version_file=$(create_version_file "$version" "$src")
 
@@ -294,7 +286,6 @@ deploy_without_pom_with_credentials() {
   --arg file "$file" \
   --arg version_file "$version_file" \
   --arg url "$url" \
-  --arg snapshot_url "$snapshot_url" \
   --arg artifact "$artifact" \
   --arg username "$username" \
   --arg password "$password" \
@@ -306,7 +297,6 @@ deploy_without_pom_with_credentials() {
     },
     source: {
       url: $url,
-      snapshot_url: $snapshot_url,
       artifact: $artifact,
       username: $username,
       password: $password,
